@@ -20,27 +20,30 @@ A Python-based system for automatically assigning people to tasks based on their
    pip install -r requirements.txt
    ```
 
-3. **Data Folder Setup**
+3. **Directory Structure**
+
+   The system uses an event-based directory structure where each event has its own input and output folders:
 
    ```bash
-   # Create the required directory structure
-   mkdir -p data/output
-
-   # Your directory structure should look like this:
-   # .
-   # ├── README.md
-   # ├── requirements.txt
-   # ├── script/
-   # │   └── main.py
-   # └── data/
-   #     ├── sample_availability_csv.csv
-   #     ├── sample_manpower_needs_csv.csv
-   #     └── output/
+   .
+   ├── README.md
+   ├── requirements.txt
+   ├── script/
+   │   └── main.py
+   └── data/
+       ├── sample_event/                   # Example event
+       │   ├── input/
+       │   │   ├── availability.csv
+       │   │   └── manpower_needs.csv
+       │   └── output/
+       └── networking_night/               # Another event
+           ├── input/
+           └── output/
    ```
 
 ## Data Format
 
-### 1. Availability Data (`data/sample_availability_csv.csv`)
+### 1. Availability Data (`input/availability.csv`)
 
 Example format:
 
@@ -66,7 +69,7 @@ Structure:
     - '1' = Available
     - Any other value = Unavailable (will be recorded as reason for unavailability)
 
-### 2. Manpower Needs (`data/sample_manpower_needs_csv.csv`)
+### 2. Manpower Needs (`input/manpower_needs.csv`)
 
 Example format:
 
@@ -90,21 +93,34 @@ Structure:
 
 ## Usage
 
-1. **Prepare Data Files**
-
-   - Create your availability data following the format above and save as `data/sample_availability_csv.csv`
-   - Create your manpower needs following the format above and save as `data/sample_manpower_needs_csv.csv`
-   - Make sure all time slots use 24-hour format (HHMM-HHMM)
-
-2. **Run the Script**
+1. **Create a New Event**
 
    ```bash
    cd script
-   python main.py
+   python main.py new_event --init
    ```
 
-3. **View Results**
-   - Results will be saved in `data/output/task_assignments_[timestamp].xlsx`
+   This will:
+
+   - Create the directory structure for your event
+   - Copy sample files as templates into the input directory
+
+2. **Prepare Event Data**
+
+   - Navigate to `data/new_event/input/`
+   - Edit `availability.csv` with your personnel data
+   - Edit `manpower_needs.csv` with your task requirements
+   - Make sure all time slots use 24-hour format (HHMM-HHMM)
+
+3. **Run the Assignment**
+
+   ```bash
+   cd script
+   python main.py new_event
+   ```
+
+4. **View Results**
+   - Results will be saved in `data/new_event/output/assignments_[timestamp].xlsx`
    - The Excel file contains two sheets:
      - "Person Assignments": Shows each person's possible and assigned tasks
      - "Task Assignments": Shows who is assigned to each task
@@ -132,4 +148,5 @@ Structure:
 - A person must be available for the ENTIRE duration of a task to be considered for assignment
 - The system tries to distribute tasks evenly while meeting all manpower requirements
 - Time slots in both files must be in 24-hour format (HHMM-HHMM)
-- The output directory (`data/output/`) is automatically created if it doesn't exist
+- Each event has its own isolated input and output folders
+- Use the `--init` flag when creating a new event to copy template files
